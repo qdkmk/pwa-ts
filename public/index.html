@@ -6,38 +6,54 @@
   <link rel="manifest" href="manifest.json">
   <title>サンプルPWA</title>
 </head>
+
 <body>
   <h1>Hi, this is my App!</h1>
   <script>
+    navigator.serviceWorker.register('/sw.js').then(function() {
+      console.log('サービスワーカーの登録成功');
+    }).catch(function(err) {
+      console.log('サービスワーカーの登録ができませんでした：', err);
+    });
 
-     navigator.serviceWorker.register('/sw.js').then(function() {
-       console.log('サービスワーカーの登録成功');
-     }).catch(function(err) {
-       console.log('サービスワーカーの登録ができませんでした：', err);
-     });
-     
-     var urlParam = location.search.substring(1);
-       var paramArray = [];
+    var urlParam = location.search.substring(1);
+    var paramArray = [];
 
-       // パラメータが存在確認、無ければ何もしない
-       if (urlParam) {
-           // 「&」が含まれている場合は「&」で分割
-           var param = urlParam.split('&');
-           // パラメータを格納する用の配列を用意
-           // 用意した配列にパラメータを格納
-           for (var i = 0; i < param.length; i++) {
-               var paramItem = param[i].split('=');
-               paramArray[paramItem[0]] = paramItem[1];
-           }
+    // パラメータが存在確認、無ければ何もしない
+    if (urlParam) {
+      // 「&」が含まれている場合は「&」で分割
+      var param = urlParam.split('&');
+      // パラメータを格納する用の配列を用意
+      // 用意した配列にパラメータを格納
+      for (var i = 0; i < param.length; i++) {
+        var paramItem = param[i].split('=');
+        paramArray[paramItem[0]] = paramItem[1];
+      }
 
-           //if (paramArray.te === "ppp") {
-               //document.getElementById("app").style.display = "none";
-           //}
-           alert("text=" + paramArray.text);
-           alert("url=" + paramArray.url);
-           alert("title=" + paramArray.title);
-           alert("all=" + param);
+      //if (paramArray.te === "ppp") {
+      //document.getElementById("app").style.display = "none";
+      //}
+      alert("text=" + paramArray.text);
+      alert("url=" + paramArray.url);
+      alert("title=" + paramArray.title);
+      alert("all=" + param);
 
-   }
-   </script>
+      // XMLHttpRequestオブジェクトの作成
+      var request = new XMLHttpRequest();
+      //時刻データをタイトルにする
+      var daytime = new Date();
+      //年・月・日・曜日を取得する
+      var year = daytime.getFullYear();
+      var month = daytime.getMonth() + 1;
+      var week = daytime.getDay();
+      var day = daytime.getDate();
+      var hour = daytime.getHours();
+      var minute = daytime.getMinutes();
+      var second = daytime.getSeconds();
+
+      // URLを開く
+      var URL = "https://scrapbox.io/pwatest/" + year + month + day + "-" + hour + minute + second + "?body=[" + paramArray.text +  "]";
+      open(URL);
+    }
+  </script>
 </body>
