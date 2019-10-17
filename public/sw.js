@@ -1,28 +1,59 @@
-var CACHE_DYNAMIC_VERSION = 'dynamic-v1';
+//キャッシュ名
+var CACHE_NAME = 'cache-v1';
 
-self.addEventListener('fetch', function(event) {
-  console.log('[Service Worker] Fetching something ...');
-  event.respondWith(
-    // キャッシュの存在チェック
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        } else {
-          // キャッシュがなければリクエストを投げて、レスポンスをキャッシュに入れる
-          return fetch(event.request)
-            .then(function(res) {
-              return caches.open(CACHE_DYNAMIC_VERSION)
-                .then(function(cache) {
-                  // 最後に res を返せるように、ここでは clone() する必要がある
-                  cache.put(event.request.url, res.clone());
-                  return res;
-                })
-            })
-            .catch(function() {
-              // エラーが発生しても何もしない
-            });
-        }
+//キャッシュに入れるリソースのパス
+var urlsToCache = [
+  '/',
+  'manifest.json',
+  'logo-img.png',
+  'pwa-icon.png'
+];
+
+
+
+//インストール状態のイベント処理
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+
+    //キャッシュの中に必要なリソースを格納する
+    caches.open(CACHE_NAME).then(function(cache) {
+
+        return cache.addAll(urlsToCache);
+
+    })
+
+  );
+});
+
+
+
+//有効化状態のイベント処理
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+
+    //現在のキャッシュをすべて取得する
+    caches.keys().then(function(cache) {
+      //新しいキャッシュ以外は削除する
+      cache.map(function(name) {
+        if(CACHE_NAME !== name) caches.delete(name);
       })
+    })
+
+  );
+});
+
+
+
+//リクエスト取得状態のイベント処理
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+
+    //リクエストに応じたリソースがキャッシュにあればそれを使う
+    caches.match(event.request).then(function(res) {
+        if(res) return res;
+
+        return fetch(event.request);
+    })
+
   );
 });
